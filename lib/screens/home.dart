@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-/// وحدة التحكم لتبديل الوضع
 class ThemeController extends GetxController {
   RxBool isDarkMode = false.obs;
 
@@ -56,7 +55,7 @@ class abdualrhman extends StatelessWidget {
                         TextField(
                           controller: field1Controller,
                           decoration: const InputDecoration(
-                            labelText: 'حقل الإدخال الأول',
+                            labelText: 'Email',
                             border: OutlineInputBorder(),
                           ),
                         ),
@@ -64,7 +63,7 @@ class abdualrhman extends StatelessWidget {
                         TextField(
                           controller: field2Controller,
                           decoration: const InputDecoration(
-                            labelText: 'حقل الإدخال الثاني',
+                            labelText: 'password',
                             border: OutlineInputBorder(),
                           ),
                         ),
@@ -81,10 +80,9 @@ class abdualrhman extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    // يمكن إضافة وظيفة الزر هنا
                   },
                   icon: const Icon(Icons.check),
-                  label: const Text('تنفيذ العملية'),
+                  label: const Text('ok'),
                 ),
               ],
             ),
