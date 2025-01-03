@@ -11,7 +11,7 @@ class ThemeController extends GetxController {
   }
 }
 
-class Suhail extends StatelessWidget {
+class abdualrhman extends StatelessWidget {
   final TextEditingController field1Controller = TextEditingController();
   final TextEditingController field2Controller = TextEditingController();
   final ThemeController themeController = Get.put(ThemeController());
@@ -102,7 +102,7 @@ void main() {
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
       themeMode: ThemeMode.light,
-      home: Suhail(),
+      home: abdualrhman(),
     ),
   );
 }
