@@ -16,7 +16,7 @@ class abdualrhman extends StatelessWidget {
   final TextEditingController field2Controller = TextEditingController();
   final ThemeController themeController = Get.put(ThemeController());
 
-  Suhail({super.key});
+  abdualrhman({super.key});
 
   @override
   Widget build(BuildContext context) {
