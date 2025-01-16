@@ -1,72 +1,51 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-
+import '../api/users_service.dart';
 import 'Verification.dart';
 
-class RegistrationScreen extends StatefulWidget {
+class abdu_RegistrationScreen extends StatefulWidget {
   @override
   _RegistrationScreenState createState() => _RegistrationScreenState();
 }
 
-class _RegistrationScreenState extends State<RegistrationScreen> {
+class _RegistrationScreenState extends State<abdu_RegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
   String name = '';
   String email = '';
   String phone = '';
-  String role = 'teacher'; // default value "teacher"
+  String role = 'teacher';
   String password = '';
   String confirmPassword = '';
 
- Future<void> registerUser() async {
-  final url = Uri.parse('https://lomfu.pythonanywhere.com/api/v1/accounts/register/');
-
-  try {
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'name': name,
-        'email': email,
-        'phone': phone,
-        'role': role,
-        'password': password,
-        'confirm_password': confirmPassword,
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      // Registration successful
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Registration Successful!')),
+  Future<void> registerUser() async {
+    if (_formKey.currentState!.validate()) {
+      final response = await abdu_UserService.registerUser(
+        name: name,
+        email: email,
+        phone: phone,
+        role: role,
+        password: password,
+        confirmPassword: confirmPassword,
       );
-    } else {
-      // Handle API errors
-      final errorResponse = json.decode(response.body);
-      final errorMessage = errorResponse['non_field_errors'] != null
-          ? errorResponse['non_field_errors'][0]
-          : 'Registration failed';
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(errorMessage)),
-      );
+      if (response['success'] == true) {
+        // Registration successful
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response['message'])),
+        );
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => abdu_VerificationScreen(email: email),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response['message'])),
+        );
+      }
     }
-  } catch (e) {
-    // Handle network or unexpected errors
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('An error occurred: $e')),
-    );
-  } finally {
-    // Navigate to the verification screen in all cases
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => VerificationScreen(email: email),
-      ),
-    );
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +59,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           key: _formKey,
           child: ListView(
             children: [
-              // Name field
               TextFormField(
                 decoration: const InputDecoration(
                   labelText: 'Name',
@@ -100,7 +78,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               ),
               const SizedBox(height: 10),
 
-              // Email field
               TextFormField(
                 decoration: const InputDecoration(
                   labelText: 'Email',
@@ -120,7 +97,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               ),
               const SizedBox(height: 10),
 
-              // Phone number field
               TextFormField(
                 decoration: const InputDecoration(
                   labelText: 'Phone Number',
@@ -140,7 +116,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               ),
               const SizedBox(height: 10),
 
-              // Role dropdown field
               DropdownButtonFormField<String>(
                 value: role,
                 decoration: const InputDecoration(
@@ -150,7 +125,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 items: ['teacher', 'student']
                     .map((role) => DropdownMenuItem(
                           value: role,
-                          child: Text(role == 'teacher' ? 'Teacher' : 'Student'),
+                          child:
+                              Text(role == 'teacher' ? 'Teacher' : 'Student'),
                         ))
                     .toList(),
                 onChanged: (value) {
@@ -167,7 +143,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               ),
               const SizedBox(height: 10),
 
-              // Password field
               TextFormField(
                 decoration: const InputDecoration(
                   labelText: 'Password',
@@ -188,7 +163,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               ),
               const SizedBox(height: 10),
 
-              // Confirm password field
               TextFormField(
                 decoration: const InputDecoration(
                   labelText: 'Confirm Password',
@@ -211,12 +185,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
               // Register button
               ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    // If data is valid, send API request
-                    registerUser();
-                  }
-                },
+                onPressed: registerUser,
                 child: const Text('Register'),
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 50),

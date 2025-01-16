@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'connection.dart';
 
-class VerificaService {
+class abdu_VerificaService {
 
   // Verify OTP
   static Future<Map<String, dynamic>> verifyOtp(String email, String otp) async {

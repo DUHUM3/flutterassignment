@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../api/auth_service.dart';
 import 'create_user.dart';
-import 'home.dart';
+import 'teachers_courses.dart';
 
 class ThemeController extends GetxController {
   RxBool isDarkMode = false.obs;
@@ -13,15 +13,15 @@ class ThemeController extends GetxController {
   }
 }
 
-class LoginScreen extends StatelessWidget {
+class abdu_LoginScreen extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final ThemeController themeController = Get.put(ThemeController());
 
-  LoginScreen({super.key});
+  abdu_LoginScreen({super.key});
 
   Future<void> loginUser(BuildContext context) async {
-    final response = await LoginService.login(
+    final response = await abdu_LoginService.login(
       emailController.text,
       passwordController.text,
     );
@@ -34,8 +34,7 @@ class LoginScreen extends StatelessWidget {
         const SnackBar(content: Text('Login Successful!')),
       );
 
-      // Navigate to HomeScreen with the access token
-      Get.to(() => HomeScreen(accessToken: accessToken));
+      Get.to(() => abdu_CoursesScreen());
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(response['error'])),
@@ -121,9 +120,9 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    Get.to(() => RegistrationScreen());
+                    Get.to(() => abdu_RegistrationScreen());
                   },
-                  child: const Text('إنشاء مستخدم'),
+                  child: const Text('Create New User'),
                 ),
               ],
             ),

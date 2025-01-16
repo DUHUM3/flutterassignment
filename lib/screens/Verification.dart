@@ -2,21 +2,21 @@ import 'package:flutter/material.dart';
 import '../api/verifica_service.dart';
 import 'login.dart';
 
-class VerificationScreen extends StatefulWidget {
+class abdu_VerificationScreen extends StatefulWidget {
   final String email;
 
-  VerificationScreen({required this.email});
+  const abdu_VerificationScreen({super.key, required this.email});
 
   @override
   _VerificationScreenState createState() => _VerificationScreenState();
 }
 
-class _VerificationScreenState extends State<VerificationScreen> {
+class _VerificationScreenState extends State<abdu_VerificationScreen> {
   final _formKey = GlobalKey<FormState>();
   String otp = '';
 
   Future<void> verifyOtp() async {
-    final response = await VerificaService.verifyOtp(widget.email, otp);
+    final response = await abdu_VerificaService.verifyOtp(widget.email, otp);
 
     if (response['success']) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -25,7 +25,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => LoginScreen()),
+        MaterialPageRoute(builder: (context) => abdu_LoginScreen()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -79,10 +79,10 @@ class _VerificationScreenState extends State<VerificationScreen> {
                     verifyOtp();
                   }
                 },
-                child: const Text('Verify'),
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 50),
                 ),
+                child: const Text('Verify'),
               ),
             ],
           ),

@@ -3,7 +3,8 @@ import 'package:get/get.dart';
 import 'screens/login.dart';
 
 void main() {
-  runApp(MyApp());
+  WidgetsFlutterBinding.ensureInitialized(); 
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData.light(), 
       darkTheme: ThemeData.dark(), 
       themeMode: ThemeMode.system, 
-      home: LoginScreen(),
+      home: abdu_LoginScreen(),
     );
   }
 }
