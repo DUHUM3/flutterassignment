@@ -2,8 +2,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+import 'connection.dart';
+
 class abdu_UserService {
-  static const String baseUrl = 'https://lomfu.pythonanywhere.com/api/v1/accounts/register/';
+  static const String baseUrl = '${Connection.baseUrl}/api/v1/accounts/register/';
 
   static Future<Map<String, dynamic>> registerUser({
     required String name,

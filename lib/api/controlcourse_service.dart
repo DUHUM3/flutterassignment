@@ -2,8 +2,10 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'connection.dart';
+
 class abdu_ControlcourseService {
-  static const String baseUrl = 'https://lomfu.pythonanywhere.com/api/v1/teachers/courses/';
+  static const String baseUrl = '${Connection.baseUrl}/api/v1/teachers/courses/';
 
   static Future<String?> getAccessToken() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
