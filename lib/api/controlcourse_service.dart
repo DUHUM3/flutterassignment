@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'connection.dart';
 
 class abdu_ControlcourseService {
-  static const String baseUrl = '${Connection.baseUrl}/api/v1/teachers/courses/';
+  static const String baseUrl = '${Connection.baseUrl}/v1/teachers/courses/';
 
   static Future<String?> getAccessToken() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();

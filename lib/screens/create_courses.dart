@@ -1,10 +1,9 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:path/path.dart' as path;
-import 'package:shared_preferences/shared_preferences.dart';
+import '../managers/pending_request_manager.dart';
+import '../api/TokenManager.dart';
+import '../widgets/course_form.dart';
 
 class abdu_AddItemScreen extends StatefulWidget {
   @override
@@ -12,161 +11,81 @@ class abdu_AddItemScreen extends StatefulWidget {
 }
 
 class _AddItemScreenState extends State<abdu_AddItemScreen> {
-  File? _imageFile;
   final _formKey = GlobalKey<FormState>();
   final _subjectController = TextEditingController();
   final _titleController = TextEditingController();
   final _overviewController = TextEditingController();
+  final PendingRequestManager _requestManager = PendingRequestManager();
 
-  final String _baseUrl = "https://lomfu.pythonanywhere.com"; 
-  final String _apiUrl = "/api/v1/teachers/courses/create/"; 
-
-  Future<String?> _getAccessToken() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('access_token');
+  @override
+  void initState() {
+    super.initState();
+    _requestManager.initHive().then((_) {
+      _requestManager.checkAndSendPendingRequests();
+    });
   }
 
-  Future<void> _pickImage() async {
-    final ImagePicker picker = ImagePicker();
-    try {
-      final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
+  Future<void> submitForm() async {
+    if (_formKey.currentState!.validate()) {
+      final url = Uri.parse('https://lomfu.pythonanywhere.com/api/v1/teachers/courses/create/');
+      final String? token = await TokenManager.getToken();
 
-      if (pickedFile != null) {
-        setState(() {
-          _imageFile = File(pickedFile.path);
-        });
-
-        print('Image Path: ${pickedFile.path}');
-        print('File Name: ${path.basename(pickedFile.path)}');
-      }
-    } catch (e) {
-      print('Error picking image: $e');
-    }
-  }
-
-  Future<void> _submitForm() async {
-    if (_formKey.currentState!.validate() && _imageFile != null) {
-      final String? accessToken = await _getAccessToken(); 
-
-      if (accessToken == null) {
-        print('Error: No access token found');
+      if (token == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: No access token found')),
+          SnackBar(content: Text('⚠️ لم يتم العثور على التوكن، الرجاء تسجيل الدخول مجددًا.')),
         );
         return;
       }
 
-      final url = Uri.parse('$_baseUrl$_apiUrl');
+      final body = {
+        'subject': _subjectController.text.trim(),
+        'title': _titleController.text.trim(),
+        'overview': _overviewController.text.trim(),
+      };
 
       try {
-        final request = http.MultipartRequest('POST', url)
-          ..headers.addAll({
-            'Authorization': 'Bearer $accessToken', 
-          })
-          ..fields['subject'] = _subjectController.text
-          ..fields['title'] = _titleController.text
-          ..fields['overview'] = _overviewController.text
-          ..files.add(await http.MultipartFile.fromPath('photo', _imageFile!.path)); 
-
-        final response = await request.send();
-        final responseBody = await response.stream.bytesToString();
+        final response = await http.post(
+          url,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+          body: json.encode(body),
+        );
 
         if (response.statusCode == 201) {
-          final jsonResponse = jsonDecode(responseBody);
-          print('Success: $jsonResponse');
-
-          final String relativeImagePath = jsonResponse['photo'];
-          final String fullImageUrl = "$_baseUrl$relativeImagePath";
-          print('Uploaded Image URL: $fullImageUrl');
-
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Data sent successfully')),
+            SnackBar(content: Text('✅ تمت إضافة المادة بنجاح!')),
           );
+          _subjectController.clear();
+          _titleController.clear();
+          _overviewController.clear();
         } else {
-          print('Failed: ${response.statusCode}');
-          print('Response Body: $responseBody');
-
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to send data: ${response.statusCode}')),
+            SnackBar(content: Text('❌ فشل الإضافة: ${response.body}')),
           );
         }
       } catch (e) {
-        print('Error: $e');
+        await _requestManager.saveToHive(body);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('An error occurred while sending data: $e')),
+          SnackBar(content: Text('⚠️ تم حفظ البيانات محليًا بسبب عدم توفر الإنترنت. سيتم إرسالها لاحقًا.')),
         );
       }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please fill all fields and select an image')),
-      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add New Item'),
-      ),
+      appBar: AppBar(title: const Text('إضافة مادة جديدة')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                controller: _subjectController,
-                decoration: const InputDecoration(labelText: 'Subject'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a subject';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(labelText: 'Title'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a title';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _overviewController,
-                decoration: const InputDecoration(labelText: 'Overview'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter an overview';
-                  }
-                  return null;
-                },
-                maxLines: 3,
-              ),
-              const SizedBox(height: 20),
-              _imageFile != null
-                  ? Image.file(
-                      _imageFile!,
-                      height: 200,
-                      width: 200,
-                      fit: BoxFit.cover,
-                    )
-                  : const Text('No image selected'),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _pickImage,
-                child: const Text('Choose Image from Gallery'),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _submitForm,
-                child: const Text('Add Item'),
-              ),
-            ],
-          ),
+        child: CourseForm(
+          formKey: _formKey,
+          subjectController: _subjectController,
+          titleController: _titleController,
+          overviewController: _overviewController,
+          submitForm: submitForm,
         ),
       ),
     );

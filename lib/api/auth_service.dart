@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'TokenManager.dart';
 import 'connection.dart';
 
 class abdu_LoginService {
-  // Login API
+  // تسجيل الدخول
   static Future<Map<String, dynamic>> login(String email, String password) async {
     final url = Uri.parse('${Connection.baseUrl}/v1/accounts/login/');
 
@@ -22,26 +22,17 @@ class abdu_LoginService {
         final responseData = json.decode(response.body);
 
         if (responseData.containsKey('access')) {
-          final SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.setString('access_token', responseData['access']);
+          await TokenManager.saveToken(responseData['access']); // ⬅️ حفظ التوكن
+          print('✅ Access Token: ${responseData['access']}'); // طباعة التوكن في التيرمنال
         }
 
-        return {
-          'success': true,
-          'data': responseData,
-        };
+        return {'success': true, 'data': responseData};
       } else {
         final errorResponse = json.decode(response.body);
-        return {
-          'success': false,
-          'error': errorResponse['detail'] ?? 'Login failed. Please try again.',
-        };
+        return {'success': false, 'error': errorResponse['detail'] ?? 'Login failed. Please try again.'};
       }
     } catch (e) {
-      return {
-        'success': false,
-        'error': 'An error occurred: $e',
-      };
+      return {'success': false, 'error': 'An error occurred: $e'};
     }
   }
 }
